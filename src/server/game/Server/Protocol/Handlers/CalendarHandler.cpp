@@ -7,13 +7,13 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "CalendarMgr.h"
+#include "Calendar.h"
 
 #include "InstanceSaveMgr.h"
 #include "Log.h"
 #include "Opcodes.h"
 #include "Player.h"
 #include "LFGMgr.h"
-#include "DBCStores.h"
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket & /*recv_data*/)
 {
@@ -22,7 +22,8 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket & /*recv_data*/)
     time_t cur_time = time(NULL);
 
 	// we can't really get the real size of this packet...
-    WorldPacket data(SMSG_CALENDAR_SEND_CALENDAR, 4+4*0+4+4*0+4+4);
+    //WorldPacket data(SMSG_CALENDAR_SEND_CALENDAR, 4+4*0+4+4*0+4+4);
+	WorldPacket data(SMSG_CALENDAR_SEND_CALENDAR, 100);
 
     sCalendarMgr->AppendInvitesToCalendarPacketForPlayer(data, GetPlayer());
     sCalendarMgr->AppendEventsToCalendarPacketForPlayer(data, GetPlayer());
@@ -76,8 +77,11 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket & /*recv_data*/)
     data.put<uint32>(p_counter, counter);
 
     // TODO: Fix this -- read from DBC?
+
+
     std::string holidayName = "";
-    uint32 holidaycount = 0;
+    uint32 holidaycount =sCalendarMgr->GetHolidayCount();
+	data << uint32(holidaycount);// holiday count
     data << uint32(holidaycount);                           // holiday count
     for (uint32 i = 0; i < holidaycount; ++i)
     {
@@ -330,7 +334,7 @@ void WorldSession::HandleCalendarGetNumPending(WorldPacket & /*recv_data*/)
 
     WorldPacket data(SMSG_CALENDAR_SEND_NUM_PENDING, 4);
     uint32 numberinvite = 0;
-    data << uint32(numberinvite);                                      // number of pending invites
+    data << uint32(numberinvite);                                      // number of pending invites 0 nothig 1 ivite pendig
     SendPacket(&data);
 }
 void WorldSession::SendCalendarEvent(uint64 eventId, bool added)

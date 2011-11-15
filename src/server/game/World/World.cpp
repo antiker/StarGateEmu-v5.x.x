@@ -1278,6 +1278,9 @@ void World::SetInitialWorldSettings()
     LoadDB2Stores(m_dataPath);
     DetectDBCLang();
 
+	sLog->outString("Loading Calendar and Holidays events...");
+	sCalendarMgr->LoadHolidayData();
+
     sLog->outString("Loading Script Names...");
     sObjectMgr->LoadScriptNames();
 
@@ -1745,8 +1748,6 @@ void World::SetInitialWorldSettings()
     sLog->outString("[Berechnen Punkte-System Reset-Zeit]" );
     InitCurrencyResetTime();
 
-	sLog->outString("Berechnen Calendar und Holidays Events...");
-	sCalendarMgr->LoadHolidayData();
  
     // possibly enable db logging; avoid massive startup spam by doing it here.
     if (sLog->GetLogDBLater())

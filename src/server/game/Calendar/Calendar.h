@@ -6,6 +6,7 @@
 #define TRINITY_CALENDAR_H
 
 #include "Common.h"
+#include "DBCStructure.h"
 
 enum CalendarEventType
 {
@@ -63,5 +64,8 @@ struct CalendarInvite
 
 typedef UNORDERED_MAP<uint64, CalendarInvite> CalendarInviteMap;
 typedef UNORDERED_MAP<uint64, CalendarEvent> CalendarEventMap;
+
+typedef UNORDERED_MAP<uint64, HolidaysEntry> HolydaysEntryMap;
+typedef UNORDERED_MAP<uint64, HolidayNamesEntry> HolydayNamesMap;
 
 #endif
