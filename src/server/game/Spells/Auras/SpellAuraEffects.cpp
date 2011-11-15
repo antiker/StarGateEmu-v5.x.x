@@ -6085,6 +6085,18 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     if (caster)
                         caster->CastSpell(caster, 13138, true, NULL, this);
                     break;
+    				// Guardian of Ancient Kings - Retribution
+                case 86698:
+                {
+                    caster->CastSpell(caster,86701,true);
+                    break;
+                }
+                    // Guardian of Ancient Kings - Holy
+                case 86669:
+                {
+                    caster->CastSpell(caster,86674,true);
+                    break;
+                }
                 case 34026:   // kill command
                 {
                     Unit *pet = target->GetGuardianPet();
@@ -6216,6 +6228,90 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     caster->CastCustomSpell(target, 63337, &mana, NULL, NULL, true);
                     caster->CastCustomSpell(target, 63338, &damage, NULL, NULL, true);
                     break;
+                }
+                case 75572: // Eject Spell!
+                {
+                    if (Vehicle *vehicle = caster->GetVehicleKit())
+                        if (Unit *driver = vehicle->GetPassenger(0))
+                        {
+                            driver->ExitVehicle();
+                            driver->GetMotionMaster()->MoveJump(driver->GetPositionX(), driver->GetPositionY(), driver->GetPositionZ()+7.0f, 2.0f, 2.0f);
+                        }
+                        break;
+                }
+                case 61551: // Toy Train Set
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+                    // Server send SMSG_PLAY_OBJECT_SOUND with train sound for each race 0o
+                    switch(target->getRace())
+                    {
+                    case RACE_BLOODELF:
+                        if(target->getGender()==GENDER_MALE)
+                            target->PlayDistanceSound(9672);
+                        else
+                            target->PlayDistanceSound(9644);
+                        break;
+                    case RACE_DRAENEI:
+                        if(target->getGender()==GENDER_MALE)
+                            target->PlayDistanceSound(9722);
+                        else
+                            target->PlayDistanceSound(9697);
+                        break;
+                    case RACE_DWARF:
+                        if(target->getGender()==GENDER_MALE)
+                            target->PlayDistanceSound(7636);
+                        else
+                            target->PlayDistanceSound(7637);
+                        break;
+                    case RACE_HUMAN:
+                        if(target->getGender()==GENDER_MALE)
+                            target->PlayDistanceSound(7634);
+                        else
+                            target->PlayDistanceSound(7635);
+                        break;
+                    case RACE_ORC:
+                        if(target->getGender()==GENDER_MALE)
+                            target->PlayDistanceSound(7638);
+                        else
+                            target->PlayDistanceSound(7639);
+                        break;
+                    case RACE_GNOME:
+                        if(target->getGender()==GENDER_MALE)
+                            target->PlayDistanceSound(7640);
+                        else
+                            target->PlayDistanceSound(7641);
+                        break;
+                    case RACE_NIGHTELF:
+                        if(target->getGender()==GENDER_MALE)
+                            target->PlayDistanceSound(7642);
+                        else
+                            target->PlayDistanceSound(7643);
+                        break;
+                    case RACE_UNDEAD_PLAYER:
+                        if(target->getGender()==GENDER_MALE)
+                            target->PlayDistanceSound(7644);
+                        else
+                            target->PlayDistanceSound(7645);
+                        break;
+                    case RACE_TAUREN:
+                        if(target->getGender()==GENDER_MALE)
+                            target->PlayDistanceSound(7646);
+                        else
+                            target->PlayDistanceSound(7647);
+                        break;
+                    case RACE_TROLL:
+                        if(target->getGender()==GENDER_MALE)
+                            target->PlayDistanceSound(7648);
+                        else
+                            target->PlayDistanceSound(7649);
+                        break;
+                    default:
+                        break;
+                    }
+
+                    target->HandleEmoteCommand(EMOTE_ONESHOT_TRAIN);
+                    return;
                 }
                 case 71563:
                     {
@@ -6377,6 +6473,23 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode, bool
                     if (GetId() == 61777)
                         target->CastSpell(target, GetAmount(), true);
                     break;
+					case SPELLFAMILY_PALADIN:
+                {
+                    switch (GetId())
+                    {
+                        // Guardian of Ancient Kings - Retribution
+                        case 86698:
+                        {
+                            if (aurApp->GetBase()->GetOwner()->ToUnit()->HasAura(86700))
+                            {
+                                caster->CastSpell((Unit*)NULL,86704,true);
+                                caster->RemoveAura(86701);
+                                caster->RemoveAura(86700);
+                            }
+                            break;
+                        }
+                    }
+                }
             }
         }
     }

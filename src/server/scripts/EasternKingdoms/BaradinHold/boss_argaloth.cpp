@@ -1,124 +1,165 @@
 /*
-* Copyright (C) 2010-2011 Project SkyFire <http://www.projectskyfire.org/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
+* Copyright (C) 2010-2011 Project StarGate
 */
 
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
+#include "ScriptPCH.h"
 #include "baradin_hold.h"
 
 enum Spells
 {
-    SPELL_BERSERK        = 47008,
-    SPELL_CONSUMING_DARKNESS  = 88954,
-    SPELL_FEL_FIRESTORM      = 88972,
-    SPELL_METEOR_SLASH      = 88942,
+    //Spells
+    SPELL_BERSERK                                 = 47008,
+    SPELL_METEOR_STRIKE_10                        = 88942,
+    SPELL_DEVILSFIRESTORM                         = 88972,
+    SPELL_DARKNESS_10                             = 88954,
 };
 
 enum Events
 {
-    EVENT_BERSERK        = 1,
-    EVENT_CONSUMING_DARKNESS  = 2,
-    EVENT_METEOR_SLASH      = 3,
+        EVENT_ENRAGE                    = 1,
+        EVENT_METEOR_STRIKE             = 2,
+        EVENT_DARKNESS                  = 3,
 };
 
-class boss_argaloth: public CreatureScript
+class boss_argaloth : public CreatureScript
 {
-  public:
+public:
     boss_argaloth() : CreatureScript("boss_argaloth") { }
-    struct boss_argalothAI: public BossAI
+
+    struct boss_argalothAI : public BossAI
     {
-      boss_argalothAI(Creature* creature) : BossAI(creature, DATA_ARGALOTH)
-      {
-      }
-      void Reset()
-      {
-        _Reset();
-        _felFireStormCount = 0;
-        me->RemoveAurasDueToSpell(SPELL_BERSERK);
-      }
-      void EnterCombat(Unit* /*who*/)
-      {
-       _EnterCombat();
-
-        events.Reset();
-        events.ScheduleEvent(EVENT_BERSERK, 300000);
-        events.ScheduleEvent(EVENT_CONSUMING_DARKNESS, urand(12000, 14000));
-        events.ScheduleEvent(EVENT_METEOR_SLASH, 15000);
-      }
-      void JustDied(Unit* /*killer*/)
-      {
-        _JustDied();
-      }
-
-      void DoAction(int32 const action)
-      {
-        if (action == ACTION_FEL_FIRESTORM)
+        boss_argalothAI(Creature *c) : BossAI(c,DATA_ARGALOTH)
         {
-          ++_felFireStormCount;
-          DoCast(SPELL_FEL_FIRESTORM);
-      }
-      }
-
-      void DamageTaken(Unit* /*attack*/, uint32& damage)
-      {
-        if (me->HealthBelowPctDamaged(66, damage) && _felFireStormCount == 0)
-          DoAction(ACTION_FEL_FIRESTORM);
-        else if (me->HealthBelowPctDamaged(33, damage) && _felFireStormCount == 1)
-          DoAction(ACTION_FEL_FIRESTORM);
-     }
-      void UpdateAI(uint32 const diff)
-      {
-        if (!UpdateVictim())
-          return;
-              events.Update(diff);
-       if (me->HasUnitState(UNIT_STAT_CASTING))
-          return;
-
-        while (uint32 eventId = events.ExecuteEvent())
-        {
-          switch(eventId)
-          {
-            case EVENT_CONSUMING_DARKNESS:
-              if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                DoCast(target, SPELL_CONSUMING_DARKNESS);
-              events.ScheduleEvent(EVENT_CONSUMING_DARKNESS, 24000);
-              break;
-            case EVENT_METEOR_SLASH:
-              DoCastVictim(SPELL_METEOR_SLASH);
-              events.ScheduleEvent(EVENT_METEOR_SLASH, 21000);
-              break;
-            case EVENT_BERSERK:
-              DoCast(me, SPELL_BERSERK);
-              break;
-            default:
-		break;
-          }
+                        baseSpeed = c->GetSpeedRate(MOVE_RUN);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_DISPEL, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_PERIODIC_HEAL, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ROOT, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CONFUSE, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SHIELD, true);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 13810, true); // Frost Trap
+            me->ApplySpellImmune(0, IMMUNITY_ID, 55741, true); // Desecration Rank 1
+            me->ApplySpellImmune(0, IMMUNITY_ID, 68766, true); // Desecration Rank 2
         }
-        DoMeleeAttackIfReady();
-      }
-    private:
-      uint8 _felFireStormCount;
+		void InitializeAI()
+        {
+                if (!me->isDead())
+         Reset();
+        }
+
+        void Reset()
+        {
+                   _Reset();
+                   fire=0;
+           me->SetSpeed(MOVE_RUN, baseSpeed, true);
+           me->RemoveAurasDueToSpell(SPELL_BERSERK);
+                   events.ScheduleEvent(EVENT_DARKNESS, urand(23000, 28000));
+                   events.ScheduleEvent(EVENT_METEOR_STRIKE, urand(20000, 25000));
+           events.ScheduleEvent(EVENT_ENRAGE, 300000);
+
+            if (instance)
+                instance->SetData(DATA_ARGALOTH, NOT_STARTED);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+                        me->setActive(true);
+                        Reset();
+            if (instance)
+                instance->SetData(DATA_ARGALOTH, IN_PROGRESS);
+        }
+        void MoveInLineOfSight(Unit* victim) {}     
+                
+        void AttackStart(Unit* victim)
+        {
+                        if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                return;
+
+            if (victim && me->Attack(victim, true))
+                me->GetMotionMaster()->MoveChase(victim);
+                                        
+            if (me->Attack(victim, true))
+            {
+                me->AddThreat(victim, 0.0f);
+                me->SetInCombatWith(victim);
+                victim->SetInCombatWith(victim);
+                DoStartMovement(victim);
+                        }
+        }
+
+
+        void JustDied(Unit*killer)
+        {
+	    _JustDied();
+            if (instance)
+                instance->SetData(DATA_ARGALOTH, DONE);
+
+                        
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+           events.Update(diff);
+                        
+                        if (!UpdateVictim())
+                return;
+
+                   if (me->HasUnitState(UNIT_STAT_CASTING))
+           return;
+                
+                        if (HealthBelowPct(66) && fire == 0)
+                        {
+                                DoCastVictim(SPELL_DEVILSFIRESTORM);
+                                fire = 1;
+                        }
+                        else
+                        if (HealthBelowPct(33) && fire == 1)
+                        {
+                                DoCastVictim(SPELL_DEVILSFIRESTORM);
+                                fire = 2;
+                        }
+
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_ENRAGE:
+                            DoCast(me, SPELL_BERSERK, true);
+                            break;
+                                                case EVENT_METEOR_STRIKE:
+                            DoCast(SPELL_METEOR_STRIKE_10);
+                                                        events.ScheduleEvent(EVENT_METEOR_STRIKE, urand(20000, 25000));
+                            break;
+                                                case EVENT_DARKNESS:
+                                                        for (int i = 0; i < 3; i++)
+                                                        {
+                                                                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM,0))
+                                                                DoCast(pTarget, SPELL_DARKNESS_10);
+                                                        }
+                                                        events.ScheduleEvent(EVENT_DARKNESS, urand(23000, 28000));
+                            break;
+                    }
+                }
+                   DoMeleeAttackIfReady();
+        }
+        private:
+            float baseSpeed;
+                        int fire;
     };
-    CreatureAI* GetAI(Creature* creature) const
+
+
+        CreatureAI* GetAI(Creature* creature) const
     {
-      return GetBaradinHoldAI<boss_argalothAI>(creature);
+      return new boss_argalothAI(creature);
     }
 };
 
 void AddSC_boss_argaloth()
 {
     new boss_argaloth();
-}

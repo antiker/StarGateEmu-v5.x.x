@@ -382,6 +382,18 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     case 28865:
                         damage = (((InstanceMap*)m_caster->GetMap())->GetDifficulty() == REGULAR_DIFFICULTY ? 2750 : 4250);
                         break;
+    				// Ancient Fury
+                    case 86704:
+                    {
+                        Aura* ancientpower = m_caster->GetAura(86700);
+
+                        if (!ancientpower)
+                            return;
+
+                        damage = (damage * ancientpower->GetStackAmount()) ;
+                        break;
+                    }
+
                     // percent from health with min
                     case 25599:                             // Thundercrash
                     {
@@ -1518,15 +1530,14 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             {
         case 87151:    // Archangel (Evangelism) 
         {
-          
-          if (Aura* evangelism = m_caster->GetAura(81661))
+			if (Aura* evangelism = m_caster->GetAura(81661))
           {
             int32 bp = 3 * evangelism->GetStackAmount();
             m_caster->CastCustomSpell(m_caster, 81700, &bp, NULL, NULL, true, 0, 0, m_caster->GetGUID());
             m_caster->CastSpell(m_caster, 87152, true);
           }
           // Dark Archangel (Dark Evangelism)
-          if (Aura* darkEvangelism = m_caster->GetAura(87118))
+            if (Aura* darkEvangelism = m_caster->GetAura(87118))
           {
             int32 bp = 4 * darkEvangelism->GetStackAmount();
             int32 mana = 5;
@@ -1842,6 +1853,17 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
             switch (m_spellInfo->Id)
             {
+				// Guardian of Ancient Kings
+                case 86150:
+                {
+                    if (m_caster->ToPlayer()->HasSpell(20473)) // Holy Shock
+                        m_caster->CastSpell(m_caster,86669,true);
+                    if (m_caster->ToPlayer()->HasSpell(85256)) // Templar's Verdict
+                        m_caster->CastSpell(m_caster,86698,true);
+                    if (m_caster->ToPlayer()->HasSpell(31935)) // Avenger's shield
+                        m_caster->CastSpell(m_caster,86659,true);
+                    return;
+                }
                 case 19740: // Blessing of Might
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
