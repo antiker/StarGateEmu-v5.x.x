@@ -163,3 +163,4 @@ public:
 void AddSC_boss_argaloth()
 {
     new boss_argaloth();
+}
