@@ -5091,8 +5091,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 case 25988:
                 {
                     // return damage % to attacker but < 50% own total health
-                    basepoints0 = int32(std::min(CalculatePctN(damage, triggerAmount), CountPctFromMaxHealth(50)));
-                    triggered_spell_id = 25997;
+                    basepoints0 = int32((triggerAmount * damage) /100);
+
+                    int32 halfMaxHealth = int32(CountPctFromMaxHealth(50));
+                    if (basepoints0 > halfMaxHealth)
+                        basepoints0 = halfMaxHealth;
+                        triggered_spell_id = 25997;
 
                     break;
                 }
@@ -6671,7 +6675,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 CastCustomSpell(target, triggered_spell_id, &basepoints0, &basepoints0, NULL, true, castItem, triggeredByAura);
                 return true;
             }
-            
             // Righteous Vengeance
             if (dummySpell->SpellIconID == 3025)
             {
@@ -6705,13 +6708,47 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 // Judgements of the Bold
                  case 89901:
                  {                   
-         if (roll_chance_f(triggerAmount) && !this->IsWithinDistInMap(pVictim, 15.0f))
-          {
-            target = this;
-            triggered_spell_id = 89906;
-            break;
-          }
+					target = this;
+                    triggered_spell_id = 89906;
+                    break;
+                }
+                // Ancient Healer
+                case 86674:
+                {
+                    int32 bp0 = damage;
+                    int32 bp1 = ((bp0 * 10) / 100);
+
+                    if (!bp0 || !bp1)
+                        return false;
+
+                    if (pVictim && pVictim->IsFriendlyTo(this))  
+                        CastCustomSpell(pVictim,86678,&bp0,&bp1,0,true,NULL,triggeredByAura,0);
+                    else
+                        CastCustomSpell(this,86678,&bp0,&bp1,0,true,NULL,triggeredByAura,0);
+                    return true;
+                }
+                // Ancient Crusader - Player
+                case 86701:
+                {
+                    target = this;
+                    triggered_spell_id = 86700;
+                    break;
                  }
+				// Uncomment this once the guardian is receiving the aura via 
+                // creature template addon and redirect aura procs to the owner
+                // Ancient Crusader - Guardian
+                /*
+                case 86703:
+
+                {
+                    Unit* owner = this->GetOwner();
+     
+                    if (!owner)
+                        return false;
+     
+                    owner->CastSpell(owner, 86700, true);
+                    return true;
+                }*/
 				    // Long Arm of The law
  	                case 87168:
  	                case 87172:
