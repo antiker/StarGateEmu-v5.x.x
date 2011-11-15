@@ -1595,47 +1595,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     else
                         target->RemoveAurasDueToSpell(64364, GetCasterGUID());
                     break;
-					case 31842: // Divine Illumination
-
-					// Item - Paladin T10 Holy 2P Bonus
-                    if (target->HasAura(70755))
-                    {
-                        if (apply)
-                            target->CastSpell(target, 71166, true);
-                        else
-                            target->RemoveAurasDueToSpell(71166);
-                    }
-                    break;
             }
             break;
-
-     if (GetSpellSpecific(GetSpellProto()) == SPELL_SPECIFIC_AURA)
-            {
-                if (GetCasterGUID() == target->GetGUID())
-                {
-                    if (apply)
-                    {
-                        // Retribution Aura Overflow
-                        if (!(GetSpellProto()->SpellFamilyFlags[0] & 0x00000008))
-                            target->CastSpell(target, 63531, true);
-                        // Improved Devotion Aura
-                        target->CastSpell(target, 63514, true);
-                        // Improved Concentration Aura
-                        target->CastSpell(target, 63510, true);
-                    }
-                    else
-                    {
-                        if (!(GetSpellProto()->SpellFamilyFlags[0] & 0x00000008))
-                            target->RemoveAurasDueToSpell(63531);
-                        // Improved Devotion Aura
-                        target->RemoveAurasDueToSpell(63514);
-                        // Improved Concentration Aura
-                        target->RemoveAurasDueToSpell(63510);
-                    }
-                }
-            }
-            break;
-
         case SPELLFAMILY_DEATHKNIGHT:
             if (GetSpellSpecific(GetSpellProto()) == SPELL_SPECIFIC_PRESENCE)
             {
@@ -2016,7 +1977,6 @@ void Aura::CallScriptEffectAfterManaShieldHandlers(AuraEffect * aurEff, AuraAppl
         (*scritr)->_FinishScriptCall();
     }
 }
-
 
 UnitAura::UnitAura(SpellEntry const* spellproto, uint8 effMask, WorldObject * owner, Unit * caster, int32 *baseAmount, Item * castItem, uint64 casterGUID)
     : Aura(spellproto, effMask, owner, caster, baseAmount, castItem, casterGUID)

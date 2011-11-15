@@ -1046,11 +1046,11 @@ struct gtSpellScaling
     //DBCString name;                                       // 1    m_name_lang
 };*/
 
-struct HolidayNamesEntry
+/*struct HolidayNamesEntry
 {
     uint32 ID;                                              // 0, this is NOT holiday id
-    DBCString name;                                       // 1    m_name_lang
-};
+    //DBCString name;                                       // 1    m_name_lang
+};*/
 
 struct HolidaysEntry
 {

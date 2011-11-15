@@ -168,7 +168,6 @@ class Aura
         std::list<AuraScript *> m_loadedScripts;
     private:
         void _DeleteRemovedApplications();
-
     protected:
         SpellEntry const * const m_spellProto;
         SpellEffectEntry const* m_spellEffect;

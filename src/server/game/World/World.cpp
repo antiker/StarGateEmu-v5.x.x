@@ -60,7 +60,6 @@
 #include "CreatureTextMgr.h"
 #include "SmartAI.h"
 #include "Channel.h"
-#include "CalendarMgr.h"
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1278,9 +1277,6 @@ void World::SetInitialWorldSettings()
     LoadDB2Stores(m_dataPath);
     DetectDBCLang();
 
-	sLog->outString("Loading Calendar and Holidays events...");
-	sCalendarMgr->LoadHolidayData();
-
     sLog->outString("Loading Script Names...");
     sObjectMgr->LoadScriptNames();
 
@@ -1748,7 +1744,6 @@ void World::SetInitialWorldSettings()
     sLog->outString("[Berechnen Punkte-System Reset-Zeit]" );
     InitCurrencyResetTime();
 
- 
     // possibly enable db logging; avoid massive startup spam by doing it here.
     if (sLog->GetLogDBLater())
     {

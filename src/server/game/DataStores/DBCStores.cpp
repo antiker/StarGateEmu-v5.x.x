@@ -93,7 +93,7 @@ DBCStorage <GtChanceToSpellCritEntry>     sGtChanceToSpellCritStore(GtChanceToSp
 //DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore(GtRegenHPPerSptfmt);
 DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore(GtRegenMPPerSptfmt);
 DBCStorage <gtSpellScaling> sGtSpellScalingStore(GtSpellScalingfmt);
-DBCStorage <HolidayNamesEntry>            sHolidayNamesStore(HolidayNamesfmt);
+
 DBCStorage <HolidaysEntry>                sHolidaysStore(Holidaysfmt);
 
 DBCStorage <ItemArmorQualityEntry>        sItemArmorQualityStore(ItemArmorQualityfmt);
@@ -361,10 +361,9 @@ void LoadDBCStores(const std::string& dataPath)
     //LoadDBC(availableDbcLocales, bad_dbc_files, sGtRegenHPPerSptStore,     dbcPath, "gtRegenHPPerSpt.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sGtRegenMPPerSptStore,     dbcPath, "gtRegenMPPerSpt.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sGtSpellScalingStore,      dbcPath, "gtSpellScaling.dbc");
-    LoadDBC(availableDbcLocales, bad_dbc_files, sHolidayNamesStore,        dbcPath, "HolidayNames.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sHolidaysStore,            dbcPath, "Holidays.dbc");
-    
-  //LoadDBC(availableDbcLocales, bad_dbc_files, sItemStore,                dbcPath, "Item.dbc");
+
+    //LoadDBC(availableDbcLocales, bad_dbc_files, sItemStore,                dbcPath, "Item.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sItemBagFamilyStore,       dbcPath, "ItemBagFamily.dbc");
     //LoadDBC(availableDbcLocales, bad_dbc_files, sItemDisplayInfoStore,     dbcPath, "ItemDisplayInfo.dbc");     -- not used currently
     //LoadDBC(availableDbcLocales, bad_dbc_files, sItemCondExtCostsStore,    dbcPath, "ItemCondExtCosts.dbc");

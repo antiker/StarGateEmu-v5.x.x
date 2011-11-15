@@ -1057,7 +1057,7 @@ enum Opcodes
     CMSG_ALTER_APPEARANCE                            = 0x034A4, // 4.0.6a 13623
     SMSG_ENABLE_BARBER_SHOP                          = 0x037E8, // 4.0.6a 13623
     SMSG_BARBER_SHOP_RESULT                          = 0x03188, // 4.0.6a 13623
-    CMSG_CALENDAR_GET_CALENDAR                       = 0x0B2A4, // 4.0.6a 13623
+    CMSG_CALENDAR_GET_CALENDAR                       = 0x101B4, //
     CMSG_CALENDAR_GET_EVENT                          = 0x03580, // 4.0.6a 13623
     CMSG_CALENDAR_GUILD_FILTER                       = 0x0ADAC, // 4.0.6a 13623
     CMSG_CALENDAR_ARENA_TEAM                         = 0x0E9AC, // 4.0.6a 13623
