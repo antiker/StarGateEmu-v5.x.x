@@ -382,6 +382,13 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     case 28865:
                         damage = (((InstanceMap*)m_caster->GetMap())->GetDifficulty() == REGULAR_DIFFICULTY ? 2750 : 4250);
                         break;
+
+					case 51673: // Rocket Blast
+                    {
+                        float distance = m_caster->GetDistance2d(unitTarget);
+                        damage *= exp(-distance/15.0f);
+                        break;
+                    }    
     				// Ancient Fury
                     case 86704:
                     {
