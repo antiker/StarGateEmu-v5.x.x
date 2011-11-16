@@ -2271,6 +2271,7 @@ void Player::RegenerateAll()
     //    return;
 
     m_regenTimerCount += m_regenTimer;
+	m_holyPowerRegenTimerCount += m_regenTimer;
 
     Regenerate(POWER_ENERGY);
 
@@ -2300,6 +2301,13 @@ void Player::RegenerateAll()
 
         m_regenTimerCount -= 2000;
     }
+
+	if (m_holyPowerRegenTimerCount >= 10000 && getClass() == CLASS_PALADIN)
+
+    {
+        Regenerate(POWER_HOLY_POWER);
+        m_holyPowerRegenTimerCount -= 10000;
+   }
 
     m_regenTimer = 0;
 }
@@ -2346,6 +2354,14 @@ void Player::Regenerate(Powers power)
         case POWER_FOCUS:
             addvalue = 12 * haste;
             break;
+		case POWER_HOLY_POWER:
+        {
+            if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+            {
+                addvalue += -1;               
+            }
+            break;
+        }
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
             addvalue += 0.01f * m_regenTimer * haste * sWorld->getRate(RATE_POWER_ENERGY);
             break;
@@ -2419,7 +2435,7 @@ void Player::Regenerate(Powers power)
         else
             m_powerFraction[power] = addvalue - integerValue;
     }
-    if (m_regenTimerCount >= 2000)
+    if (m_regenTimerCount >= 2000 || m_holyPowerRegenTimerCount >= 10000)
         SetPower(power, curValue);
     else
         UpdateUInt32Value(UNIT_FIELD_POWER1 + power, curValue);

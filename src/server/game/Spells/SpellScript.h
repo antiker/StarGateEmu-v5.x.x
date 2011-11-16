@@ -107,11 +107,12 @@ enum SpellScriptHookType
     SPELL_SCRIPT_HOOK_HIT,
     SPELL_SCRIPT_HOOK_AFTER_HIT,
     SPELL_SCRIPT_HOOK_UNIT_TARGET_SELECT,
+	SPELL_SCRIPT_HOOK_CHECK_CAST,
 };
 #define HOOK_SPELL_HIT_START SPELL_SCRIPT_HOOK_EFFECT
 #define HOOK_SPELL_HIT_END SPELL_SCRIPT_HOOK_AFTER_HIT + 1
 #define HOOK_SPELL_START SPELL_SCRIPT_HOOK_EFFECT
-#define HOOK_SPELL_END SPELL_SCRIPT_HOOK_UNIT_TARGET_SELECT + 1
+#define HOOK_SPELL_END SPELL_SCRIPT_HOOK_CHECK_CAST + 1
 #define HOOK_SPELL_COUNT HOOK_SPELL_END - HOOK_SPELL_START
 
 class SpellScript : public _SpellScript
@@ -120,11 +121,22 @@ class SpellScript : public _SpellScript
     // DO NOT OVERRIDE THESE IN SCRIPTS
     public:
         #define SPELLSCRIPT_FUNCTION_TYPE_DEFINES(CLASSNAME) \
+			typedef SpellCastResult(CLASSNAME::*SpellCheckCastFnType)(); \
             typedef void(CLASSNAME::*SpellEffectFnType)(SpellEffIndex); \
             typedef void(CLASSNAME::*SpellHitFnType)(); \
             typedef void(CLASSNAME::*SpellUnitTargetFnType)(std::list<Unit*>&); \
 
         SPELLSCRIPT_FUNCTION_TYPE_DEFINES(SpellScript)
+
+
+		class CheckCastHandler
+        {
+            public:
+                CheckCastHandler(SpellCheckCastFnType checkCastHandlerScript);
+                SpellCastResult Call(SpellScript* spellScript);
+            private:
+                SpellCheckCastFnType _checkCastHandlerScript;
+        };
 
         class EffectHandler : public  _SpellScript::EffectNameCheck, public _SpellScript::EffectHook
         {
@@ -159,6 +171,7 @@ class SpellScript : public _SpellScript
         };
 
         #define SPELLSCRIPT_FUNCTION_CAST_DEFINES(CLASSNAME) \
+		class CheckCastHandlerFunction : public SpellScript::CheckCastHandler { public: CheckCastHandlerFunction(SpellCheckCastFnType _checkCastHandlerScript) : SpellScript::CheckCastHandler((SpellScript::SpellCheckCastFnType)_checkCastHandlerScript) {} }; \
         class EffectHandlerFunction : public SpellScript::EffectHandler { public: EffectHandlerFunction(SpellEffectFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : SpellScript::EffectHandler((SpellScript::SpellEffectFnType)_pEffectHandlerScript, _effIndex, _effName) {} }; \
         class HitHandlerFunction : public SpellScript::HitHandler { public: HitHandlerFunction(SpellHitFnType _pHitHandlerScript) : SpellScript::HitHandler((SpellScript::SpellHitFnType)_pHitHandlerScript) {} }; \
         class UnitTargetHandlerFunction : public SpellScript::UnitTargetHandler { public: UnitTargetHandlerFunction(SpellUnitTargetFnType _pUnitTargetHandlerScript, uint8 _effIndex, uint16 _targetType) : SpellScript::UnitTargetHandler((SpellScript::SpellUnitTargetFnType)_pUnitTargetHandlerScript, _effIndex, _targetType) {} }; \
@@ -172,8 +185,9 @@ class SpellScript : public _SpellScript
         bool _IsDefaultEffectPrevented(SpellEffIndex effIndex) { return m_hitPreventDefaultEffectMask & (1<<effIndex); }
         void _PrepareScriptCall(SpellScriptHookType hookType);
         void _FinishScriptCall();
-        bool IsInHitPhase() { return (m_currentScriptState >= HOOK_SPELL_HIT_START && m_currentScriptState < HOOK_SPELL_HIT_END); }
-        bool IsInEffectHook() { return (m_currentScriptState == SPELL_SCRIPT_HOOK_EFFECT); }
+        bool IsInCheckCastHook() const { return m_currentScriptState == SPELL_SCRIPT_HOOK_CHECK_CAST; }
+        bool IsInHitPhase() const { return (m_currentScriptState >= HOOK_SPELL_HIT_START && m_currentScriptState < HOOK_SPELL_HIT_END); }
+        bool IsInEffectHook() const { return (m_currentScriptState == SPELL_SCRIPT_HOOK_EFFECT); }
         bool IsInAfterHitPhase() const { return (m_currentScriptState == SPELL_SCRIPT_HOOK_AFTER_HIT); }
     private:
         Spell * m_spell;
@@ -183,7 +197,12 @@ class SpellScript : public _SpellScript
         //
         // SpellScript interface
         // hooks to which you can attach your functions
-        //
+        // example: OnCheckCast += SpellCheckCastFn();
+        // where function is SpellCastResult function()
+
+        HookList<CheckCastHandler> OnCheckCast;
+        #define SpellCheckCastFn(F) CheckCastHandlerFunction(&F)
+
         // example: OnEffect += SpellEffectFn(class::function, EffectIndexSpecifier, EffectNameSpecifier);
         // where function is void function(SpellEffIndex effIndex)
         HookList<EffectHandler> OnEffect;
@@ -283,6 +302,7 @@ class SpellScript : public _SpellScript
 
         // finishes spellcast prematurely with selected error message
         void FinishCast(SpellCastResult result);
+		void SetCustomCastResultMessage(SpellCustomErrors result);
 };
 
 // AuraScript interface - enum used for runtime checks of script function calls
@@ -425,7 +445,7 @@ class AuraScript : public _SpellScript
         //
         // executed when periodic aura effect is applied with specified mode to target
         // example: OnEffectApply += AuraEffectApplyFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier, AuraEffectHandleModes);
-        // where function is: void function (AuraEffect const * aurEff);
+        // where function is: void function (AuraEffect * aurEff);
         HookList<EffectApplyHandler> OnEffectApply;
         #define AuraEffectApplyFn(F, I, N, M) EffectApplyHandlerFunction(&F, I, N, M)
 
